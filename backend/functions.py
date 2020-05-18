@@ -57,6 +57,7 @@ class Models():
 
     def kmeans_v_2(self, col):
         x = self.prepare_date(col)
+        print(x.shape)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
         k = np.where(target_mapper < 0.1, 15,
@@ -99,6 +100,7 @@ class Models():
 
     def lof_model(self, col, p):
         x = self.prepare_date(col)
+        print(x.shape)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
         n = np.where(target_mapper < 0.1, 5,
@@ -123,6 +125,7 @@ class Models():
 
     def if_model_v2(self, col, n_estimators):
         x = self.prepare_date(col)
+        print(x.shape)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
         cont = np.where(target_mapper < 0.1, 0.25,
