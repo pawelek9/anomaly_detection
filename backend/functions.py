@@ -57,16 +57,16 @@ class Models():
 
     def kmeans_v_2(self, col):
         x = self.prepare_date(col)
-        print(x.shape)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
-        k = np.where(target_mapper < 0.1, 15,
-                     np.where(target_mapper < 0.2, 12,
-                              np.where(target_mapper < 0.5, 10,
+        k = np.where(target_mapper < 0.1, 13,
+                     np.where(target_mapper < 0.2, 10,
+                              np.where(target_mapper < 0.5, 9,
                                        np.where(target_mapper < 0.6, 8,
                                                 np.where(target_mapper < 0.7, 6, 5)))))
         kmeans = KMeans(n_clusters=int(k))
         x = x.iloc[:, :1]
+        print(x.shape)
         kmeans.fit(x)
         x['cluster'] = kmeans.predict(x)
         x.reset_index()
@@ -100,7 +100,6 @@ class Models():
 
     def lof_model(self, col, p):
         x = self.prepare_date(col)
-        print(x.shape)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
         n = np.where(target_mapper < 0.1, 5,
@@ -111,6 +110,7 @@ class Models():
 
         lof = LocalOutlierFactor(n_neighbors=int(n), n_jobs=-1, p=p)
         x = x.iloc[:, :1]
+        print(x.shape)
         print('lof', n)
         lof.fit(x)
         predicted = lof.fit_predict(x)
@@ -125,7 +125,6 @@ class Models():
 
     def if_model_v2(self, col, n_estimators):
         x = self.prepare_date(col)
-        print(x.shape)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
         cont = np.where(target_mapper < 0.1, 0.25,
@@ -140,6 +139,7 @@ class Models():
                               max_samples=0.8)
         x = x.iloc[:, :1]
         x['t'] = np.array(range(x.shape[0])) + 1
+        print(x.shape)
 
         clf.fit(x)
         predicted = clf.fit_predict(x)
