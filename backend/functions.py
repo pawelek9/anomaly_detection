@@ -10,8 +10,8 @@ import time
 class DataPrepare():
 
     def __init__(self):
-        self.path =  r'D:\Desktop\APLIKACJE\studia\licencjat\projekt\funds.csv'
-        self.dataframe = pd.read_csv(self.path, sep= ';', encoding= 'latin')
+        self.path =  r'C:\Users\pawelkl\Desktop\test_py\licencjat\input.csv'
+        self.dataframe = pd.read_csv(self.path, sep= ',', encoding= 'latin-1')
 
     def create_data_info(self):
         print('min date: ', self.dataframe.Data.min(),'max date: ', self.dataframe.Data.max())
@@ -24,7 +24,6 @@ class DataPrepare():
         self.dataframe.replace(',', '.', inplace=True)
         self.dataframe['Data'] = pd.to_datetime(self.dataframe['Data'])
         self.dataframe.set_index('Data', inplace= True)
-        self.dataframe = self.dataframe.apply(lambda x: x.str.replace(',', '.').astype(float))
 
 
 class Models():
@@ -59,11 +58,11 @@ class Models():
         x = self.prepare_date(col)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
-        k = np.where(target_mapper < 0.1, 13,
-                     np.where(target_mapper < 0.2, 10,
-                              np.where(target_mapper < 0.5, 9,
-                                       np.where(target_mapper < 0.6, 8,
-                                                np.where(target_mapper < 0.7, 6, 5)))))
+        k = np.where(target_mapper < 0.1, 2,
+                     np.where(target_mapper < 0.2, 4,
+                              np.where(target_mapper < 0.5, 6,
+                                       np.where(target_mapper < 0.6, 10,
+                                                np.where(target_mapper < 0.7, 13, 17)))))
         kmeans = KMeans(n_clusters=int(k))
         x = x.iloc[:, :1]
         print(x.shape)
@@ -102,11 +101,9 @@ class Models():
         x = self.prepare_date(col)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
-        n = np.where(target_mapper < 0.1, 5,
-                     np.where(target_mapper < 0.2, 8,
-                              np.where(target_mapper < 0.5, 10,
-                                       np.where(target_mapper < 0.6, 12,
-                                                np.where(target_mapper < 0.7, 16, 18)))))
+        n = np.where(target_mapper < 0.1, 3,
+                     np.where(target_mapper < 0.2, 7,
+                                                np.where(target_mapper < 0.7, 10, 12)))
 
         lof = LocalOutlierFactor(n_neighbors=int(n), n_jobs=-1, p=p)
         x = x.iloc[:, :1]
@@ -127,11 +124,9 @@ class Models():
         x = self.prepare_date(col)
         shape = self.data.shape[0]
         target_mapper = x.shape[0] / shape
-        cont = np.where(target_mapper < 0.1, 0.25,
-                        np.where(target_mapper < 0.2, 0.2,
-                                 np.where(target_mapper < 0.5, 0.15,
-                                          np.where(target_mapper < 0.6, 0.12,
-                                                   np.where(target_mapper < 0.7, 0.1, 0.08)))))
+        cont = np.where(target_mapper < 0.1, 0.1,
+                            np.where(target_mapper < 0.5, 0.07,
+                                    np.where(target_mapper < 0.7, 0.06, 0.05)))
 
         clf = IsolationForest(n_estimators=n_estimators,
                               n_jobs=-1,
@@ -160,19 +155,10 @@ class Mapper():
         self.data = data
 
     def create_mapper(self):
-        self.df = pd.Series({col: self.create_table(col) for col in self.data.columns})
-        critical_value = self.df.quantile(0.9)
+        self.df = pd.Series({col: 0 if len(self.data[col].dropna())< 300 else 1 for col in self.data.columns})
         self.df = pd.DataFrame(self.df)
-        self.df['mapper'] = np.where(self.df < critical_value,
-                                     'if_results', 'kmeans_results')
+        self.df['mapper'] = np.where(self.df  == 1, 'if_results', 'kmeans_results')
         self.df.reset_index(inplace=True)
         self.df.columns = ['funds_name', 'rq', 'algorithms']
 
-    def create_table(self, col):
-        data = self.data[col]
-        data = data.dropna()
-        Q = (data.describe().loc['75%'] - data.describe().loc['25%']) / 2
-        rq = Q / data.describe().loc['50%']
-
-        return rq
-
+ 
